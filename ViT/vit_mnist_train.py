@@ -69,7 +69,7 @@ if __name__ == '__main__':
     emb_dropout=0.
     ).to('cuda')
     torch.manual_seed(310)
-    lr = 1e-3
+    lr = 5e-3
     device = "cuda"
     epoch_num = 40
     criterion = nn.CrossEntropyLoss()
