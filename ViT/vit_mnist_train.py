@@ -37,8 +37,8 @@ def train_epoch(model, dataloader, criterion, optimizer, scheduler, epoch, devic
             f' acc={corr/total*100:.2f}'
             f' loss={loss.item():.2f}'
             )
-        trainwriter.add_scalar(tag='train_loss', scalar_value=loss.item(), global_step=total + epoch*len(dataloader))
-        trainwriter.add_scalar(tag='train_acc', scalar_value=corr/total*100, global_step=total + epoch*len(dataloader))
+    trainwriter.add_scalar(tag='loss', scalar_value=loss.item(), global_step=epoch)
+    trainwriter.add_scalar(tag='acc', scalar_value=corr/total*100, global_step=epoch)
     scheduler.step()
 
 def test_epoch(model, dataloader, device):
@@ -51,7 +51,7 @@ def test_epoch(model, dataloader, device):
             correct += (torch.argmax(pred_cls, axis=1)==gt_cls).sum().item()
             total += len(X)
     print(f' val acc: {correct / total * 100:.2f}')
-    testwriter.add_scalar(tag='test_acc', scalar_value=correct/total*100, global_step=epoch)
+    testwriter.add_scalar(tag='acc', scalar_value=correct/total*100, global_step=epoch)
 
 if __name__ == '__main__':
     
@@ -68,14 +68,13 @@ if __name__ == '__main__':
     dropout=0.5,
     emb_dropout=0.
     ).to('cuda')
-
     torch.manual_seed(310)
-    lr = 1e-2
+    lr = 1e-3
     device = "cuda"
-    epoch_num = 30
+    epoch_num = 40
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr,)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.95, last_epoch=-1)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98, last_epoch=-1)
     for epoch in range(epoch_num):
         train_epoch(model, trainloader, criterion, optimizer, scheduler, epoch, device)
         test_epoch(model, testloader, device)
