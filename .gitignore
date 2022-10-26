@@ -1,3 +1,5 @@
 datasets/*
 __*
-*/log/*
+log
+*_train
+*_test
